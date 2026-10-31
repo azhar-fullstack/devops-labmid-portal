@@ -30,14 +30,25 @@ jobs:
           pytest --json-report --json-report-file=pytest-report.json
 
       - name: Build report and POST to local receiver
+        id: report
+        continue-on-error: true
         env:
           REPORT_RECEIVER_URL: ${{ secrets.REPORT_RECEIVER_URL }}
         run: |
           python scripts/build_and_send_report.py pytest-report.json
-          # Exit with pytest result so the job fails when tests fail
-          if [ "${{ steps.pytest.outcome }}" != "success" ]; then
-            exit 1
-          fi
+
+      - name: Email test report (bonus)
+        if: always()
+        continue-on-error: true
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          REPORT_EMAIL_TO: ${{ secrets.REPORT_EMAIL_TO }}
+          REPORT_EMAIL_FROM: ${{ secrets.REPORT_EMAIL_FROM }}
+        run: |
+          python scripts/send_email_report.py test-report.json
 
       - name: Upload test-report artifact
         if: always()
@@ -49,10 +60,16 @@ jobs:
             pytest-report.json
           if-no-files-found: warn
 
-  # Bonus: publish a static status page to GitHub Pages
+      - name: Fail job when tests failed
+        if: steps.pytest.outcome != 'success'
+        run: |
+          echo "Automated tests failed — failing the CI stage as required."
+          exit 1
+
+  # Bonus: deploy static demo to GitHub Pages ONLY when all tests pass
   pages:
     needs: test-and-report
-    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -70,23 +87,15 @@ jobs:
         with:
           name: test-report
           path: report-data
-        continue-on-error: true
 
       - name: Build Pages site
         run: |
           mkdir -p _site
           cp docs/index.html _site/index.html
-          if [ -f report-data/test-report.json ]; then
-            cp report-data/test-report.json _site/test-report.json
-          else
-            echo '{"overall_status":"unknown","tests":[]}' > _site/test-report.json
-          fi
+          cp report-data/test-report.json _site/test-report.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
-        continue-on-error: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -96,4 +105,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        continue-on-error: true
