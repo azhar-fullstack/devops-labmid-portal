@@ -90,3 +90,5 @@ def test_invalid_submission_url_is_rejected(client, clean_data):
 
     saved = json.loads(Path(clean_data).read_text(encoding="utf-8"))
     assert saved == []
+    # DEMO_FAIL: temporary intentional failure for Lab Mid CI fail demo — revert after
+    assert False, "intentional fail demo for Lab Mid report"
