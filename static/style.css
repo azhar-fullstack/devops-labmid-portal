@@ -1,0 +1,84 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f3efe6;
+  color: #1e1e1e;
+  line-height: 1.5;
+}
+
+header {
+  background: #0f3d3e;
+  color: #f4efe6;
+  padding: 28px 20px;
+  text-align: center;
+}
+
+header p { opacity: 0.85; margin-top: 6px; }
+
+main {
+  max-width: 820px;
+  margin: 24px auto;
+  padding: 0 16px 40px;
+}
+
+.card {
+  background: #fffdf8;
+  border: 1px solid #d9d0c1;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 18px;
+}
+
+.card h2 {
+  color: #0f3d3e;
+  margin-bottom: 14px;
+}
+
+label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px;
+  border: 1px solid #cbbfae;
+  border-radius: 6px;
+  font: inherit;
+}
+
+button {
+  margin-top: 8px;
+  background: #0f3d3e;
+  color: #fff;
+  border: 0;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.messages { list-style: none; margin-bottom: 14px; }
+.messages li {
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+.messages .success { background: #e3f6ea; color: #14532d; }
+.messages .error { background: #fde8e8; color: #7f1d1d; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #e5ddd0;
+  vertical-align: top;
+  word-break: break-word;
+}
+th { color: #0f3d3e; }
+.empty { color: #666; }
+a { color: #0f3d3e; }

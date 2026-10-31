@@ -1,0 +1,95 @@
+name: Lab Mid CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-and-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run pytest (JSON report)
+        id: pytest
+        continue-on-error: true
+        run: |
+          pytest --json-report --json-report-file=pytest-report.json
+
+      - name: Build report and POST to local receiver
+        env:
+          REPORT_RECEIVER_URL: ${{ secrets.REPORT_RECEIVER_URL }}
+        run: |
+          python scripts/build_and_send_report.py pytest-report.json
+          # Exit with pytest result so the job fails when tests fail
+          if [ "${{ steps.pytest.outcome }}" != "success" ]; then
+            exit 1
+          fi
+
+      - name: Upload test-report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: |
+            test-report.json
+            pytest-report.json
+          if-no-files-found: warn
+
+  # Bonus: publish a static status page to GitHub Pages
+  pages:
+    needs: test-and-report
+    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download test-report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test-report
+          path: report-data
+        continue-on-error: true
+
+      - name: Build Pages site
+        run: |
+          mkdir -p _site
+          cp docs/index.html _site/index.html
+          if [ -f report-data/test-report.json ]; then
+            cp report-data/test-report.json _site/test-report.json
+          else
+            echo '{"overall_status":"unknown","tests":[]}' > _site/test-report.json
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

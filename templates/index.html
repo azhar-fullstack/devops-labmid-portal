@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignment Submission Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>Assignment Submission Portal</h1>
+    <p>DevOps Lab Mid — CSC418 | COMSATS Attock</p>
+  </header>
+
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="messages">
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <section class="card">
+      <h2>New submission</h2>
+      <form method="post" action="{{ url_for('index') }}">
+        <label>Name
+          <input type="text" name="name" value="{{ form.name }}" placeholder="Azhar Mehmood">
+        </label>
+        <label>Registration number
+          <input type="text" name="reg_no" value="{{ form.reg_no }}" placeholder="FA23-BAI-039">
+        </label>
+        <label>Assignment title
+          <input type="text" name="title" value="{{ form.title }}" placeholder="Lab Mid Portal">
+        </label>
+        <label>Submission URL
+          <input type="text" name="url" value="{{ form.url }}" placeholder="https://github.com/you/repo">
+        </label>
+        <button type="submit">Submit</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Saved submissions</h2>
+      {% if submissions %}
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Reg. No</th>
+              <th>Title</th>
+              <th>URL</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in submissions %}
+              <tr>
+                <td>{{ s.name }}</td>
+                <td>{{ s.reg_no }}</td>
+                <td>{{ s.title }}</td>
+                <td><a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.url }}</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="empty">No submissions yet.</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>
