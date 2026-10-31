@@ -71,7 +71,12 @@ def main() -> int:
     req = urllib.request.Request(
         url,
         data=data,
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            # Bypass ngrok free-tier browser interstitial for CI clients
+            "ngrok-skip-browser-warning": "true",
+            "User-Agent": "GitHubActions-LabMid-Report/1.0",
+        },
         method="POST",
     )
     try:
