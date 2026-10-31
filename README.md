@@ -11,7 +11,8 @@ Flask web portal for assignment submissions, with automated pytest coverage, Git
 - Saved submissions listed on the same page
 - Three automated tests (happy path, missing reg no, invalid URL)
 - CI posts a structured `test-report.json` to a local receiver
-- Bonus: GitHub Pages status page (`docs/`)
+- Bonus: GitHub Pages status page (`docs/`) — deploys **only when tests pass**
+- Bonus: Email test report after pass and fail (SMTP secrets)
 
 ## Project layout
 
